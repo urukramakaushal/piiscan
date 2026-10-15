@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "piiscan"
+version = "0.1.0"
+description = "Scan CSV files for personal data (emails, phones, cards, Aadhaar, PAN, IPs) and mask it."
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = ["pandas"]
+license = { text = "MIT" }
+
+[project.scripts]
+piiscan = "piiscan.cli:main"
