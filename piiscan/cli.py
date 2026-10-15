@@ -12,7 +12,13 @@ def main():
     p.add_argument("--json", action="store_true", help="print the report as JSON")
     a = p.parse_args()
 
-    df = pd.read_csv(a.path, dtype=str)
+    for enc in ("utf-8-sig", "cp1252", "latin-1"):
+        try:
+            df = pd.read_csv(a.path, dtype=str, encoding=enc)
+            break
+        except UnicodeDecodeError:
+            continue
+
     report = scan(df)
     print(json.dumps(report, indent=2) if a.json else format_report(report, len(df)))
     if a.mask:
