@@ -1,6 +1,20 @@
+import io
 import pandas as pd
 import streamlit as st
 from piiscan.core import scan, mask
+
+ENCODINGS = ["utf-8-sig", "cp1252", "latin-1"]  # latin-1 never fails, so it goes last
+
+
+def read_csv_any(raw: bytes) -> pd.DataFrame:
+    last = None
+    for enc in ENCODINGS:
+        try:
+            return pd.read_csv(io.BytesIO(raw), dtype=str, encoding=enc)
+        except UnicodeDecodeError as e:
+            last = e
+    raise last
+
 
 st.set_page_config(page_title="piiscan", page_icon="🛡️", layout="centered")
 st.title("🛡️ piiscan")
@@ -9,7 +23,11 @@ st.warning("Don't upload real sensitive data to a public demo. Use sample or alr
 
 file = st.file_uploader("CSV file", type="csv")
 if file:
-    df = pd.read_csv(file, dtype=str)
+    try:
+        df = read_csv_any(file.getvalue())
+    except Exception as e:
+        st.error(f"Could not read this file as a CSV: {e}")
+        st.stop()
     st.caption(f"{df.shape[0]} rows × {df.shape[1]} columns")
 
     report = scan(df)
